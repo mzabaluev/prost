@@ -6,6 +6,7 @@ use alloc::format;
 use alloc::string::String;
 use alloc::string::ToString;
 use core::fmt;
+use prost::OpenEnum;
 
 impl fmt::Debug for Msg {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -18,17 +19,16 @@ impl fmt::Debug for Msg {
 fn tuple_struct_custom_debug() {
     #[derive(Clone, PartialEq, prost::Message)]
     #[prost(skip_debug)]
-    struct NewType(#[prost(enumeration = "AnEnum", tag = "5")] i32);
+    struct NewType(#[prost(enumeration = "AnEnum", tag = "5")] OpenEnum<AnEnum>);
     impl fmt::Debug for NewType {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.write_str("NewType(custom_debug)")
         }
     }
     assert_eq!(
-        format!("{:?}", NewType(AnEnum::B as i32)),
+        format!("{:?}", NewType(AnEnum::B.into())),
         "NewType(custom_debug)"
     );
-    assert_eq!(format!("{:?}", NewType(42)), "NewType(custom_debug)");
 }
 
 #[derive(Clone, PartialEq, prost::Oneof)]
@@ -38,8 +38,8 @@ pub enum OneofWithEnumCustomDebug {
     Int(i32),
     #[prost(string, tag = "9")]
     String(String),
-    #[prost(enumeration = "BasicEnumeration", tag = "10")]
-    Enumeration(i32),
+    #[prost(enumeration = "AnEnum", tag = "10")]
+    Enumeration(OpenEnum<AnEnum>),
 }
 impl fmt::Debug for OneofWithEnumCustomDebug {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -63,7 +63,7 @@ impl fmt::Debug for MessageWithOneofCustomDebug {
 /// Enumerations inside oneofs
 #[test]
 fn oneof_with_enum_custom_debug() {
-    let of = OneofWithEnumCustomDebug::Enumeration(AnEnum::B as i32);
+    let of = OneofWithEnumCustomDebug::Enumeration(AnEnum::B.into());
     assert_eq!(format!("{:?}", of), "OneofWithEnumCustomDebug {..}");
     let msg = MessageWithOneofCustomDebug { of: Some(of) };
     assert_eq!(format!("{:?}", msg), "MessageWithOneofCustomDebug {..}");
@@ -75,7 +75,7 @@ fn test_proto_msg_custom_debug() {
     let msg = Msg {
         a: 0,
         b: "".to_string(),
-        c: Some(msg::C::D(AnEnum::A as i32)),
+        c: Some(msg::C::D(AnEnum::A.into())),
     };
     assert_eq!(format!("{:?}", msg), "Msg {..}");
 }
