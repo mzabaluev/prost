@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn boxed_field_setter_accepts_unboxed_values() {
         let msg = Zoo::builder().boxed_field(EmptyForNow::default()).build();
-        assert_eq!(msg.boxed_field, Some(Box::new(EmptyForNow::default())));
+        assert_eq!(msg.boxed_field, Some(Box::default()));
     }
 
     #[test]
