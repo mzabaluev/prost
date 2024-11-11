@@ -113,11 +113,11 @@ pub struct FieldDescriptorProto {
     #[prost(int32, optional, tag = "3")]
     pub number: ::core::option::Option<i32>,
     #[prost(enumeration = "field_descriptor_proto::Label", optional, tag = "4")]
-    pub label: ::core::option::Option<::prost::OpenEnum<field_descriptor_proto::Label>>,
+    pub label: ::core::option::Option<i32>,
     /// If type_name is set, this need not be set.  If both this and type_name
     /// are set, this must be one of TYPE_ENUM, TYPE_MESSAGE or TYPE_GROUP.
     #[prost(enumeration = "field_descriptor_proto::Type", optional, tag = "5")]
-    pub r#type: ::core::option::Option<::prost::OpenEnum<field_descriptor_proto::Type>>,
+    pub r#type: ::core::option::Option<i32>,
     /// For message and enum types, this is the name of the type.  If the name
     /// starts with a '.', it is fully-qualified.  Otherwise, C++-like scoping
     /// rules are used to find the type (i.e. first the nested types within this
@@ -470,9 +470,7 @@ pub struct FileOptions {
         tag = "9",
         default = "Speed"
     )]
-    pub optimize_for: ::core::option::Option<
-        ::prost::OpenEnum<file_options::OptimizeMode>,
-    >,
+    pub optimize_for: ::core::option::Option<i32>,
     /// Sets the Go package where structs generated from this .proto will be
     /// placed. If omitted, the Go package will be derived from the following:
     ///
@@ -666,7 +664,7 @@ pub struct FieldOptions {
         tag = "1",
         default = "String"
     )]
-    pub ctype: ::core::option::Option<::prost::OpenEnum<field_options::CType>>,
+    pub ctype: ::core::option::Option<i32>,
     /// The packed option can be enabled for repeated primitive fields to enable
     /// a more efficient representation on the wire. Rather than repeatedly
     /// writing the tag and type for each element, the entire array is encoded as
@@ -691,7 +689,7 @@ pub struct FieldOptions {
         tag = "6",
         default = "JsNormal"
     )]
-    pub jstype: ::core::option::Option<::prost::OpenEnum<field_options::JsType>>,
+    pub jstype: ::core::option::Option<i32>,
     /// Should this field be parsed lazily?  Lazy applies only to message-type
     /// fields.  It means that when the outer message is initially parsed, the
     /// inner message's contents will not be parsed but instead stored in encoded
@@ -879,9 +877,7 @@ pub struct MethodOptions {
         tag = "34",
         default = "IdempotencyUnknown"
     )]
-    pub idempotency_level: ::core::option::Option<
-        ::prost::OpenEnum<method_options::IdempotencyLevel>,
-    >,
+    pub idempotency_level: ::core::option::Option<i32>,
     /// The parser stores options it doesn't recognize here. See above.
     #[prost(message, repeated, tag = "999")]
     pub uninterpreted_option: ::prost::alloc::vec::Vec<UninterpretedOption>,
@@ -1306,17 +1302,17 @@ pub struct Type {
     pub source_context: ::core::option::Option<SourceContext>,
     /// The source syntax.
     #[prost(enumeration = "Syntax", tag = "6")]
-    pub syntax: ::prost::OpenEnum<Syntax>,
+    pub syntax: i32,
 }
 /// A single field of a message type.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Field {
     /// The field type.
     #[prost(enumeration = "field::Kind", tag = "1")]
-    pub kind: ::prost::OpenEnum<field::Kind>,
+    pub kind: i32,
     /// The field cardinality.
     #[prost(enumeration = "field::Cardinality", tag = "2")]
-    pub cardinality: ::prost::OpenEnum<field::Cardinality>,
+    pub cardinality: i32,
     /// The field number.
     #[prost(int32, tag = "3")]
     pub number: i32,
@@ -1518,7 +1514,7 @@ pub struct Enum {
     pub source_context: ::core::option::Option<SourceContext>,
     /// The source syntax.
     #[prost(enumeration = "Syntax", tag = "5")]
-    pub syntax: ::prost::OpenEnum<Syntax>,
+    pub syntax: i32,
 }
 /// Enum value definition.
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1630,7 +1626,7 @@ pub struct Api {
     pub mixins: ::prost::alloc::vec::Vec<Mixin>,
     /// The source syntax of the service.
     #[prost(enumeration = "Syntax", tag = "7")]
-    pub syntax: ::prost::OpenEnum<Syntax>,
+    pub syntax: i32,
 }
 /// Method represents a method of an API interface.
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -1655,7 +1651,7 @@ pub struct Method {
     pub options: ::prost::alloc::vec::Vec<Option>,
     /// The source syntax of this method.
     #[prost(enumeration = "Syntax", tag = "7")]
-    pub syntax: ::prost::OpenEnum<Syntax>,
+    pub syntax: i32,
 }
 /// Declares an API Interface to be included in this interface. The including
 /// interface must redeclare all the methods from the included interface, but
@@ -2099,7 +2095,7 @@ pub mod value {
     pub enum Kind {
         /// Represents a null value.
         #[prost(enumeration = "super::NullValue", tag = "1")]
-        NullValue(::prost::OpenEnum<super::NullValue>),
+        NullValue(i32),
         /// Represents a double value.
         #[prost(double, tag = "2")]
         NumberValue(f64),

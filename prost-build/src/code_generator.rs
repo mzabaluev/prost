@@ -402,7 +402,7 @@ impl CodeGenerator<'_> {
 
     fn append_field(&mut self, fq_message_name: &str, field: &Field) {
         let type_ = field.descriptor.r#type();
-        let repeated = field.descriptor.label.and_then(|v| v.known()) == Some(Label::Repeated);
+        let repeated = field.descriptor.label == Some(Label::Repeated as i32);
         let deprecated = self.deprecated(&field.descriptor);
         let optional = self.optional(&field.descriptor);
         let boxed = self.boxed(&field.descriptor, fq_message_name, None);
@@ -427,15 +427,19 @@ impl CodeGenerator<'_> {
         let type_tag = self.field_type_tag(&field.descriptor);
         self.buf.push_str(&type_tag);
 
-        if type_ == Type::Bytes {
-            let bytes_type = self
-                .config
-                .bytes_type
-                .get_first_field(fq_message_name, field.descriptor.name())
-                .copied()
-                .unwrap_or_default();
-            self.buf
-                .push_str(&format!("={:?}", bytes_type.annotation()));
+        match type_ {
+            Type::Bytes => {
+                let bytes_type = self
+                    .config
+                    .bytes_type
+                    .get_first_field(fq_message_name, field.descriptor.name())
+                    .copied()
+                    .unwrap_or_default();
+                self.buf
+                    .push_str(&format!("={:?}", bytes_type.annotation()));
+            }
+            Type::Enum => self.push_enum_type_annotation(fq_message_name, field.descriptor.name()),
+            _ => {}
         }
 
         match field.descriptor.label() {
@@ -555,12 +559,16 @@ impl CodeGenerator<'_> {
         let value_tag = self.map_value_type_tag(value);
 
         self.buf.push_str(&format!(
-            "#[prost({}=\"{}, {}\", tag=\"{}\")]\n",
+            "#[prost({}=\"{}, {}\"",
             map_type.annotation(),
             key_tag,
             value_tag,
-            field.descriptor.number()
         ));
+        if value.r#type() == Type::Enum {
+            self.push_enum_type_annotation(fq_message_name, field.descriptor.name());
+        }
+        self.buf
+            .push_str(&format!(", tag=\"{}\")]\n", field.descriptor.number()));
         self.append_field_attributes(fq_message_name, field.descriptor.name());
         self.push_indent();
         self.buf.push_str(&format!(
@@ -639,11 +647,12 @@ impl CodeGenerator<'_> {
 
             self.push_indent();
             let ty_tag = self.field_type_tag(&field.descriptor);
-            self.buf.push_str(&format!(
-                "#[prost({}, tag=\"{}\")]\n",
-                ty_tag,
-                field.descriptor.number()
-            ));
+            self.buf.push_str(&format!("#[prost({}", ty_tag,));
+            if field.descriptor.r#type() == Type::Enum {
+                self.push_enum_type_annotation(&oneof_name, field.descriptor.name());
+            }
+            self.buf
+                .push_str(&format!(", tag=\"{}\")]\n", field.descriptor.number()));
             self.append_field_attributes(&oneof_name, field.descriptor.name());
 
             self.push_indent();
@@ -947,6 +956,14 @@ impl CodeGenerator<'_> {
         self.buf.push_str("}\n");
     }
 
+    fn push_enum_type_annotation(&mut self, fq_message_name: &str, field_name: &str) {
+        match self.enum_field_repr(fq_message_name, field_name) {
+            EnumRepr::Int => {}
+            EnumRepr::Open => self.buf.push_str(", enum_type=\"open\""),
+            EnumRepr::Closed => self.buf.push_str(", enum_type=\"closed\""),
+        }
+    }
+
     fn resolve_type(&self, field: &FieldDescriptorProto, fq_message_name: &str) -> String {
         match field.r#type() {
             Type::Float => String::from("f32"),
@@ -966,11 +983,15 @@ impl CodeGenerator<'_> {
                 .rust_type()
                 .to_owned(),
             Type::Group | Type::Message => self.resolve_ident(field.type_name()),
-            Type::Enum => format!(
-                "{}::OpenEnum<{}>",
-                prost_path(self.config),
-                self.resolve_ident(field.type_name())
-            ),
+            Type::Enum => match self.enum_field_repr(fq_message_name, field.name()) {
+                EnumRepr::Int => String::from("i32"),
+                EnumRepr::Open => format!(
+                    "{}::OpenEnum<{}>",
+                    prost_path(self.config),
+                    self.resolve_ident(field.type_name())
+                ),
+                EnumRepr::Closed => self.resolve_ident(field.type_name()),
+            },
         }
     }
 
@@ -1010,6 +1031,26 @@ impl CodeGenerator<'_> {
             .chain(ident_path.map(to_snake))
             .chain(iter::once(to_upper_camel(ident_type)))
             .join("::")
+    }
+
+    fn enum_field_repr(&self, fq_message_name: &str, field_name: &str) -> EnumRepr {
+        if self
+            .config
+            .typed_enum_fields
+            .get_first_field(fq_message_name, field_name)
+            .is_some()
+        {
+            // FIXME: store information for the code generator to know when
+            // proto3 enums are used in proto2, where they should be open
+            // accordingly to the spec:
+            // https://protobuf.dev/programming-guides/enum/#spec
+            match self.syntax {
+                Syntax::Proto2 => EnumRepr::Closed,
+                Syntax::Proto3 => EnumRepr::Open,
+            }
+        } else {
+            EnumRepr::Int
+        }
     }
 
     fn field_type_tag(&self, field: &FieldDescriptorProto) -> Cow<'static, str> {
@@ -1074,7 +1115,7 @@ impl CodeGenerator<'_> {
         fq_message_name: &str,
         oneof: Option<&str>,
     ) -> bool {
-        let repeated = field.label.and_then(|v| v.known()) == Some(Label::Repeated);
+        let repeated = field.label == Some(Label::Repeated as i32);
         let fd_type = field.r#type();
         if !repeated
             && (fd_type == Type::Message || fd_type == Type::Group)
@@ -1146,6 +1187,12 @@ fn can_pack(field: &FieldDescriptorProto) -> bool {
             | Type::Bool
             | Type::Enum
     )
+}
+
+enum EnumRepr {
+    Int,
+    Closed,
+    Open,
 }
 
 struct EnumVariantMapping<'a> {
