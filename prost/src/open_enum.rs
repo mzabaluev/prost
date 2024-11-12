@@ -1,5 +1,5 @@
 use crate::encoding::{DecodeContext, WireType};
-use crate::{DecodeError, Message};
+use crate::{DecodeError, Message, UnknownEnumValue};
 
 use bytes::{Buf, BufMut};
 
@@ -126,6 +126,23 @@ impl<T> OpenEnum<T> {
             Self::Known(v) => v,
             Self::Unknown(_) => T::default(),
         }
+    }
+
+    /// If the value of the open enum is known, returns it in `Ok`, otherwise
+    /// returns an `Err` with the unknown value.
+    pub fn get(&self) -> Result<T, UnknownEnumValue>
+    where
+        T: Clone,
+    {
+        match self {
+            Self::Known(v) => Ok(v.clone()),
+            Self::Unknown(r) => Err(UnknownEnumValue(*r)),
+        }
+    }
+
+    /// Sets the value of receiver to the provided known value.
+    pub fn set(&mut self, value: T) {
+        *self = Self::Known(value);
     }
 
     /// If the value of the open enum is known, returns it in `Some`, otherwise
