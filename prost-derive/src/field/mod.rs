@@ -256,7 +256,7 @@ impl EnumType {
                         _ => {}
                     }
                 }
-                bail!("invalid value of enum_type attribute: {:?}", lit);
+                bail!("invalid value of enum_type attribute: {}", quote!(#lit));
             }
             Meta::List(meta_list) => {
                 let ident = meta_list.parse_args::<Ident>()?;
@@ -265,11 +265,11 @@ impl EnumType {
                 } else if ident == "closed" {
                     Ok(Some(EnumType::Closed))
                 } else {
-                    bail!("invalid content of enum_type attribute: {:?}", ident);
+                    bail!("invalid content of enum_type attribute: {}", ident);
                 }
             }
             _ => {
-                bail!("invalid enum_type attribute: {:?}", attr);
+                bail!("invalid enum_type attribute: {}", quote!(#attr));
             }
         }
     }
