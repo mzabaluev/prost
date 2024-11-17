@@ -378,8 +378,7 @@ impl Config {
     ///
     /// Depending on the proto file syntax, the representation type can be:
     /// * For closed enums (in proto2), the corresponding Rust enum type.
-    /// * For open enums (in proto3), the Rust enum type wrapped in
-    /// [`OpenEnum`](prost::OpenEnum).
+    /// * For open enums (in proto3), the Rust enum type wrapped in [`OpenEnum`](prost::OpenEnum).
     ///
     /// # Arguments
     ///

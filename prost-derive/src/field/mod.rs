@@ -261,9 +261,9 @@ impl EnumType {
             Meta::List(meta_list) => {
                 let ident = meta_list.parse_args::<Ident>()?;
                 if ident == "open" {
-                    return Ok(Some(EnumType::Open));
+                    Ok(Some(EnumType::Open))
                 } else if ident == "closed" {
-                    return Ok(Some(EnumType::Closed));
+                    Ok(Some(EnumType::Closed))
                 } else {
                     bail!("invalid content of enum_type attribute: {:?}", ident);
                 }
