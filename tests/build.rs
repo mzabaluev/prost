@@ -103,12 +103,6 @@ fn main() {
         .unwrap();
 
     prost_build::Config::new()
-        .btree_map(["."])
-        .enum_attribute(".", "#[cfg_attr(kani, derive(kani::Arbitrary))]")
-        .compile_protos(&[src.join("encoded_len.proto")], includes)
-        .unwrap();
-
-    prost_build::Config::new()
         .skip_debug(["custom_debug.Msg"])
         .compile_protos(&[src.join("custom_debug.proto")], includes)
         .unwrap();

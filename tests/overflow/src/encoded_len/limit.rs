@@ -1,7 +1,3 @@
-mod proto {
-    include!(concat!(env!("OUT_DIR"), "/encoded_len.rs"));
-}
-
 // Test that the limits returned by field::scalar::Ty::encoded_len_limit()
 // in prost-derive: 1) are upheld; 2) can be reached with actual values.
 

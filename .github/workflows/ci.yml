@@ -227,7 +227,7 @@ jobs:
         uses: model-checking/kani-github-action@v1.1
         with:
           args: |
-            -p tests --tests
+            -p tests-overflow --tests
 
   no-std:
     runs-on: ubuntu-latest

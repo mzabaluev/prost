@@ -9,8 +9,9 @@ authors.workspace = true
 default = ["std"]
 std = []
 
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("edition-2015"))'] }
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(feature, values("edition-2015"))', 'cfg(kani)']
 
 [dependencies]
 cfg-if = "1"
