@@ -102,7 +102,9 @@ fn main() {
         .compile_protos(&[src.join("default_string_escape.proto")], includes)
         .unwrap();
 
-    config
+    prost_build::Config::new()
+        .btree_map(["."])
+        .enum_attribute(".", "#[cfg_attr(kani, derive(kani::Arbitrary))]")
         .compile_protos(&[src.join("encoded_len.proto")], includes)
         .unwrap();
 

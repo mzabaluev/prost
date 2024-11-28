@@ -212,11 +212,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify with Kani
+        with:
+          submodules: 'recursive'
+      - name: Verify prost-types with Kani
         uses: model-checking/kani-github-action@v1.1
         with:
           args: |
             -p prost-types
+      - name: install protoc
+        uses: taiki-e/install-action@v2
+        with:
+          tool: protoc@${{ env.PROTOC_VERSION }}
+      - name: Verify test proofs with Kani
+        uses: model-checking/kani-github-action@v1.1
+        with:
+          args: |
+            -p tests --tests
+
   no-std:
     runs-on: ubuntu-latest
     steps:
