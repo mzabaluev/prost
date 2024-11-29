@@ -160,7 +160,7 @@ jobs:
         with:
           targets: i686-unknown-linux-gnu
       - name: install multilib support for GCC
-        run: sudo apt-get install -y gcc-multilib g++-multilib
+        run: sudo apt-get install -y gcc-multilib
       - name: install protoc
         uses: taiki-e/install-action@v2
         with:
